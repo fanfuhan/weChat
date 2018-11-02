@@ -3,7 +3,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 public class MyDBHelper extends SQLiteOpenHelper {
-    private String ddlCreate="create table message" +
+    private String ddlCreate="create table  if not exists message" +
             "(sender varchar(20),receiver varchar(20),content varchar(100))";
 
     public MyDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {

@@ -5,6 +5,15 @@ public class ChatContent {
     private String receiver;
     private String content;
 
+    public ChatContent(String sender, String receiver, String content) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.content = content;
+    }
+
+    public ChatContent() {
+    }
+
     public String getSender() {
         return sender;
     }

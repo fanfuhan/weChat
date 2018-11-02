@@ -3,6 +3,7 @@ package com.wechat.activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,9 +32,8 @@ public class LoginActivity extends AppCompatActivity {
         userName = editText.getText().toString();
         Intent intentService = new Intent();
         intentService.putExtra("userName",userName);
-        intentService.setClass(this, ChatService.class);
+        intentService.setClass(this,ChatService.class);
         startService(intentService);
-
         // 跳转到好友列表
         Intent intentActivity = new Intent(this,FriendListActivity.class);
         intentActivity.putExtra("me",userName);

@@ -20,7 +20,7 @@ public class ChatContentAdapter extends ArrayAdapter<ChatContent> {
     private int resource;
     private List<ChatContent> chatList;
 
-    public ChatContentAdapter(@NonNull Context context, int resource, List<ChatContent> chatList,String me) {
+    public ChatContentAdapter(@NonNull Context context, int resource, List<ChatContent> chatList, String me) {
         super(context, resource);
         this.context = context;
         this.resource = resource;
@@ -43,31 +43,20 @@ public class ChatContentAdapter extends ArrayAdapter<ChatContent> {
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         ChatContent chatContent = chatList.get(position);
-        if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(resource, parent, false);
+        convertView = LayoutInflater.from(context).inflate(resource, parent, false);
+
+        convertView.findViewById(R.id.layout_left).setVisibility(View.VISIBLE);
+        convertView.findViewById(R.id.layout_right).setVisibility(View.VISIBLE);
+
+        if (chatContent.getSender().equals(me)) {
+            convertView.findViewById(R.id.layout_left).setVisibility(View.GONE);
+            TextView tv = convertView.findViewById(R.id.content_right);
+            tv.setText(chatContent.getContent());
+        } else {
+            convertView.findViewById(R.id.layout_right).setVisibility(View.GONE);
+            TextView tv = convertView.findViewById(R.id.content_left);
+            tv.setText(chatContent.getContent());
         }
-
-        //将资源ID变成View
-        View view=LayoutInflater
-                .from(getContext())
-                .inflate(resource,parent,false);
-
-
-//        TextView nameTv=view.findViewById(R.id.name);
-//        TextView priceTv=view.findViewById(R.id.price);
-//        convertView.findViewById(R.id.layout_left).setVisibility(View.VISIBLE);
-//        convertView.findViewById(R.id.layout_right).setVisibility(View.VISIBLE);
-//        if(cc.isMe()){
-//            convertView.findViewById(R.id.layout_left).setVisibility(View.GONE);
-//           TextView tv= convertView.findViewById(R.id.content_right);
-//           tv.setText(cc.getContent());
-//        }
-//        else{
-//            convertView.findViewById(R.id.layout_right).setVisibility(View.GONE);
-//            TextView tv= convertView.findViewById(R.id.content_left);
-//            tv.setText(cc.getContent());
-//        }
-
 
         return convertView;
     }

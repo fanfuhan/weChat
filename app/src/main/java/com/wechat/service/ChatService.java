@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.wechat.dataBase.MyDBHelper;
 
@@ -33,6 +34,7 @@ public class ChatService extends Service {
         super.onCreate();
         init();
 
+        // 接受服务器数据
         new Thread() {
             @Override
             public void run() {
@@ -41,9 +43,8 @@ public class ChatService extends Service {
                         while ((receiverMessage = bReader.readLine()) != null) {
                             if (receiverMessage.startsWith("&")) {
                                 Intent intent = new Intent();
+                                intent.setAction("com.wechat.activity.RECEIVER");
                                 intent.putExtra("friends", receiverMessage);
-                                intent.putExtra("me", userName);
-                                intent.setAction("com.wechat.RECEIVER");
                                 sendBroadcast(intent);
                             } else {
                                 receiveWords = receiverMessage.split(":");
@@ -68,15 +69,27 @@ public class ChatService extends Service {
     }
 
     private void init() {
+        Thread t = new Thread(){
+            @Override
+            public void run() {
+                try {
+                    socket = new Socket("47.106.208.254", 23);
+                    bReader = new BufferedReader(
+                            new InputStreamReader(socket.getInputStream(), "UTF-8"));
+                    pWriter = new PrintWriter(
+                            new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        t.start();
         try {
-            socket = new Socket("47.106.208.254", 23);
-            bReader = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream(), "UTF-8"));
-            pWriter = new PrintWriter(
-                    new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
-        } catch (IOException e) {
+            t.join();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         helper = new MyDBHelper(this, "Message", null, 1);
         db = helper.getWritableDatabase();
 
@@ -88,12 +101,23 @@ public class ChatService extends Service {
         if (isFirst) {
             isFirst = false;
             userName = intent.getStringExtra("userName");
-            pWriter.println(userName);
+            new Thread(){
+                @Override
+                public void run() {
+                    pWriter.println(userName);
+                }
+            }.start();
+
         } else {
             sendMessage = intent.getStringExtra("message");
             sendWords = receiverMessage.split(":");
             updateDatabase(sendWords);
-            pWriter.println(sendMessage);
+            new Thread(){
+                @Override
+                public void run() {
+                    pWriter.println(sendMessage);
+                }
+            }.start();
         }
         return super.onStartCommand(intent, flags, startId);
     }

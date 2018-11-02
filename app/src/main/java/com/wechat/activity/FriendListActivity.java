@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -56,16 +57,17 @@ public class FriendListActivity extends AppCompatActivity {
 
         //动态注册广播接收器
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.wechat.RECEIVER");
+        intentFilter.addAction("com.wechat.activity.RECEIVER");
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+
                 friends = intent.getStringExtra("friends");
-                // me = intent.getStringExtra("me");
+                Log.i("ffffffffffffffff",friends);
                 friendsList = Arrays.asList(friends.split(":"));
-                friendsList.remove(0);
-                friendsList.remove(friendsList.size() - 1);
-                friendsList.remove(me);
+//                friendsList.remove(0);
+//                friendsList.remove(friendsList.size() - 1);
+//                friendsList.remove(me);
 
                 adapter.notifyDataSetChanged();
             }
