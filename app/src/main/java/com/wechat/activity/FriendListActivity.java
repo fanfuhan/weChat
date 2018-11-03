@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -30,17 +31,18 @@ public class FriendListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_friend_list);
         init();
 
-        final Intent intent = new Intent(this,ChatActivity.class);
+        final Intent intent = new Intent(this, ChatActivity.class);
         // 设置Listview监听
         friendLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String friendName= friendsList.get(position);
-                intent.putExtra("friendName",friendName);
-                intent.putExtra("me",me);
+                String friendName = friendsList.get(position);
+                intent.putExtra("friendName", friendName);
+                intent.putExtra("me", me);
                 startActivity(intent);
             }
         });
@@ -48,11 +50,12 @@ public class FriendListActivity extends AppCompatActivity {
 
     private void init() {
         me = getIntent().getStringExtra("me");
+        Log.i("fffff", me);
 
         // 更新Listview
         friendLv = findViewById(R.id.friendLv);
         friendsList = new ArrayList<>();
-        adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,friendsList);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, friendsList);
         friendLv.setAdapter(adapter);
 
         //动态注册广播接收器
@@ -61,17 +64,23 @@ public class FriendListActivity extends AppCompatActivity {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-
                 friends = intent.getStringExtra("friends");
-                Log.i("ffffffffffffffff",friends);
-                friendsList = Arrays.asList(friends.split(":"));
-//                friendsList.remove(0);
-//                friendsList.remove(friendsList.size() - 1);
-//                friendsList.remove(me);
+                String[] friendStr = friends.split(":");
+                for (int i = 1; i < friendStr.length - 1; i++) {
+                    if (!me.equals(friendStr[i]))
+                        friendsList.add(friendStr[i]);
+                }
 
                 adapter.notifyDataSetChanged();
             }
         };
         registerReceiver(receiver, intentFilter);
+    }
+
+    public void quit(View view) {
+        Intent intent = new Intent();
+        intent.setAction("com.wechat.RECEIVER");
+        intent.putExtra("bye","bye");
+        sendBroadcast(intent);
     }
 }

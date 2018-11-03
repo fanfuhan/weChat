@@ -1,12 +1,19 @@
 package com.wechat.service;
 
+import android.app.ActivityManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.wechat.activity.FriendListActivity;
 import com.wechat.dataBase.MyDBHelper;
 
 import java.io.BufferedReader;
@@ -15,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.List;
 
 public class ChatService extends Service {
     private Socket socket;
@@ -28,6 +36,7 @@ public class ChatService extends Service {
     private String receiverMessage;
     private String[] receiveWords;
     private String[] sendWords;
+    private BroadcastReceiver receiver;
 
     @Override
     public void onCreate() {
@@ -42,6 +51,11 @@ public class ChatService extends Service {
                     while (true) {
                         while ((receiverMessage = bReader.readLine()) != null) {
                             if (receiverMessage.startsWith("&")) {
+                                try {
+                                    Thread.sleep(3000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                                 Intent intent = new Intent();
                                 intent.setAction("com.wechat.activity.RECEIVER");
                                 intent.putExtra("friends", receiverMessage);
@@ -94,6 +108,19 @@ public class ChatService extends Service {
         db = helper.getWritableDatabase();
 
         isFirst = true;
+
+        //动态注册广播接收器
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.wechat.RECEIVER");
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String bye = intent.getStringExtra("bye");
+                Log.i("bye","bye");
+                pWriter.println(bye);
+            }
+        };
+        registerReceiver(receiver, intentFilter);
     }
 
     @Override
@@ -110,7 +137,7 @@ public class ChatService extends Service {
 
         } else {
             sendMessage = intent.getStringExtra("message");
-            sendWords = receiverMessage.split(":");
+            sendWords = sendMessage.split(":");
             updateDatabase(sendWords);
             new Thread(){
                 @Override
@@ -125,5 +152,27 @@ public class ChatService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    /**
+     * 判断某个Activity 界面是否在前台
+     * @param context
+     * @param className 某个界面名称
+     * @return
+     */
+    public boolean  isForeground(Context context, String className) {
+        if (context == null || TextUtils.isEmpty(className)) {
+            return false;
+        }
+
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(1);
+        if (list != null && list.size() > 0) {
+            ComponentName cpn = list.get(0).topActivity;
+            if (className.equals(cpn.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

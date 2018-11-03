@@ -39,4 +39,9 @@ public class LoginActivity extends AppCompatActivity {
         intentActivity.putExtra("me",userName);
         startActivity(intentActivity);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 }

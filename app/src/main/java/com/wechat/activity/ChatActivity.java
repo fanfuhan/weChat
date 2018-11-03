@@ -9,6 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -39,6 +42,8 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_chat);
         init();
 
@@ -57,10 +62,10 @@ public class ChatActivity extends AppCompatActivity {
             }
         }.start();
 
-        handler = new Handler(){
+        handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                if(msg.what == 1){
+                if (msg.what == 1) {
                     adapter.notifyDataSetChanged();
                 }
             }
@@ -70,17 +75,19 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void updateChatList() {
-        String sql = "select * from message where sender=? or receiver=?";
-        Cursor c = db.rawQuery(sql, new String[]{friendName, friendName});
+        chatList.clear();
+        String sql = "select * from message where (sender=? and receiver=?) or (sender=? and receiver=?)";
+        Cursor c = db.rawQuery(sql, new String[]{me, friendName, friendName, me});
         while (c.moveToNext()) {
             String sender = c.getString(c.getColumnIndex("sender"));
             String receiver = c.getString(c.getColumnIndex("receiver"));
             String content = c.getString(c.getColumnIndex("content"));
 
-            ChatContent chatContent = new ChatContent(sender,receiver,content);
+            ChatContent chatContent = new ChatContent(sender, receiver, content);
             chatList.add(chatContent);
         }
     }
+
 
     private void initListView() {
         adapter = new ChatContentAdapter(this, R.layout.chat_layout, chatList, me);
@@ -93,8 +100,9 @@ public class ChatActivity extends AppCompatActivity {
         friendNameView = findViewById(R.id.friendName);
         friendNameView.setText(friendName);
         sendMsgEdit = findViewById(R.id.sendMsg);
-        chatLv = findViewById(R.id.friendLv);
+        chatLv = findViewById(R.id.chatLv);
         chatList = new ArrayList<>();
+        tempMsg = new StringBuilder();
 
         // 数据库
         helper = new MyDBHelper(this, "Message", null, 1);
@@ -107,8 +115,11 @@ public class ChatActivity extends AppCompatActivity {
 
     public void send(View view) {
         sendMsg = sendMsgEdit.getText().toString();
+
         if (sendMsg != null) {
+            // 传到服务端
             sendMsg = tempMsg.append(me).append(":").append(friendName).append(":").append(sendMsg).toString();
+            tempMsg.setLength(0);
             Intent intent = new Intent(this, ChatService.class);
             intent.putExtra("message", sendMsg);
             startService(intent);

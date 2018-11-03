@@ -4,25 +4,34 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:orientation="vertical"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".activity.FriendListActivity"
-    android:background="@drawable/gb2">
+    android:background="@drawable/bg3">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="150dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
         android:text="好友列表"
-        android:textColor="@android:color/background_light"
-        android:textSize="30sp" />
+        android:textColor="@android:color/background_dark"
+        android:textSize="26sp" />
+
+    <Button
+        android:text="退出"
+        android:layout_gravity="center"
+        android:onClick="quit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <ListView
         android:id="@+id/friendLv"
+        android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:textColor="#FFFFFF">
-
     </ListView>
 
 </LinearLayout>
