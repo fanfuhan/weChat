@@ -64,6 +64,7 @@ public class FriendListActivity extends AppCompatActivity {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                friendsList.clear();
                 friends = intent.getStringExtra("friends");
                 String[] friendStr = friends.split(":");
                 for (int i = 1; i < friendStr.length - 1; i++) {
@@ -82,5 +83,8 @@ public class FriendListActivity extends AppCompatActivity {
         intent.setAction("com.wechat.RECEIVER");
         intent.putExtra("bye","bye");
         sendBroadcast(intent);
+
+        Intent intent1 = new Intent(this,LoginActivity.class);
+        startActivity(intent1);
     }
 }
